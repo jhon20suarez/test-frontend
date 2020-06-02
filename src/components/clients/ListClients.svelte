@@ -13,6 +13,8 @@
   let showDialogQuestion = false;
   let clients=[];
   let clientSelect=null;
+  let searchFullName;
+  let page=1;
   
   const handleClick = () => {
     token_api.update(n => '');
@@ -21,7 +23,7 @@
   onMount(() => listClients());
 	
 	async function listClients(){
-	  const res = await fetch(API, {
+	  const res = await fetch(API.concat('?page=').concat(page), {
 	                            method: 'GET',
                               headers:{
                                 'Content-Type': 'application/json',
@@ -34,6 +36,32 @@
       alert(clients.errors);
       clients=[];
     }
+	}
+	
+	async function searchClients(){
+	  if (searchFullName!==undefined && searchFullName!==""){
+	    const res = await fetch(API.concat('/search/full_name/').concat(searchFullName), {
+  	                            method: 'GET',
+                                headers:{
+                                  'Content-Type': 'application/json',
+                                  'Authorization': 'Bearer ' + $token_api
+                                }
+  	                          });
+      clients = await res.json();
+      if(res.status===200){
+        if (clients.length===0){
+          alert("No se encontro ningun cliente con nombre "+searchFullName)
+        }
+      }else if(res.status===401){
+        token_api.update(n => '');
+        alert(clients.errors);
+        clients=[];
+      }else{
+        alert(clients.errors);
+      }
+	  }else{
+	    listClients();
+	  }
 	}
 	
 	async function deleteClient() {
@@ -53,6 +81,10 @@
     }else{
       alert(data.errors);
     }
+	}
+	async function handleKeydown() {
+	  console.log("handleKeydown");
+	  console.log(event.keyCode);
 	}
 	
 </script>
@@ -84,20 +116,28 @@
         </div>
       </nav>
 
-<main class="">
-    <section class="fixed w-full h-full text-gray-900 bg-gray-200 justify-center overflow-auto">
-      <div class="container px-1 h-full">
-          <div class="w-full px-4 pt-4 content-center h-full items-center justify-center">
-            <div class="py-2">
-              <Button color="secondary" on:click={() =>{clientSelect=null; showDialog = true;}} >Nuevo Cliente</Button>
+
+    <section class="w-full h-full text-gray-900 bg-gray-200" >
+      <div class="container h-full px-1 w-full h-full mx-auto">
+          <div class="w-full px-2 pt-2 content-center h-full">
+            <div class="mx-1 px-4 mx-auto md:flex items-center justify-between">
+              <div class="md:w-1/2 text-center md:text-left">
+                <Button color="secondary" on:click={() =>{clientSelect=null; showDialog = true;}} >Nuevo Cliente</Button>
+              </div>
+              <div class="md:w-1/2">
+                <form on:submit|preventDefault={searchClients}>
+                <TextField bind:value={searchFullName} append="search" label="Búsqueda" placeholder="Búsqueda por nombre" color=secondary on:keyup={event => (console.log(vevent))} />
+                <form>
+              </div>
             </div>
+            <div class="pb-8 flex-1 overflow-auto">
             <table class="table-auto w-full text-md bg-white shadow-md rounded mb-4">
               <thead class="border-b">
                 <tr>
                   <th class="px-4 py-2"></th>
-                  <th class="px-4 py-2">Tipo de Documento</th>
-                  <th class="px-4 py-2">Identificación</th>
-                  <th class="px-4 py-2">Nombre</th>
+                  <th class="px-4 py-2 w-1/3">Tipo de Documento</th>
+                  <th class="px-4 py-2 ">Identificación</th>
+                  <th class="px-4 py-2 w-1/3">Nombre</th>
                   <th class="px-4 py-2">Fecha de Nacimiento</th>
                   <th class="px-4 py-2">Genero</th>
                   <th class="px-4 py-2">Ciudad</th>
@@ -109,7 +149,9 @@
                   <tr class="border-b hover:bg-orange-100 bg-gray-100" value={client.id} animate:flip>
                     <td class="px-2" >
                     {#if client.avatar!=''}
-                      <img class="h-10 w-12 xl:w-16 xl:h-16 rounded-full" src="{url_api}{client.avatar}">
+                      <div class="flex-shrink-0 w-10 h-10">
+                        <img class="w-full h-full rounded-full" src="{url_api}{client.avatar}">
+                      </div>
                     {/if}
                     </td>
                     <td class="px-4 py-2">{client.document_type}</td>
@@ -140,18 +182,28 @@
               <tfoot>
                 <tr class="m-12">
                   <td colspan="100%" class="border-none">
-                    <div class="flex border border-grey-light rounded w-auto font-sans justify-center">
-                      <Button color="blue" outlined icon="keyboard_arrow_left" small></Button>
-                      <Button color="blue" outlined icon="keyboard_arrow_right" small></Button>
+                    <div class="border border-grey-light rounded w-auto font-sans text-center">
+                      Pagina {page}
+                      <div class="flex justify-center">
+                        <Tooltip>
+                          <div slot="activator" class="mx-1">
+                            <Button color=secondary outlined icon="keyboard_arrow_left" small on:click={()=>{if(page>1){ page -= 1; listClients();searchFullName=null}}}></Button>
+                          </div>
+                          Anterior
+                        </Tooltip>
+                        <Tooltip>
+                          <div slot="activator" class="mx-1">
+                            <Button color=secondary outlined icon="keyboard_arrow_right" small on:click={()=>{page += 1; listClients();searchFullName=null}}></Button>
+                          </div>
+                          Siguiente
+                        </Tooltip>
+                      </div>
                     </div>
                   </td>
                 </tr>
               </tfoot>
             </table>
+            </div>
           </div>
       </div>
     </section>
-</main>
-<footer class="absolute w-full bottom-0 bg-gray-900 pb-6">
-          
-        </footer>

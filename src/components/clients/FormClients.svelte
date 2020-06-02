@@ -239,7 +239,9 @@
   
     <div class="md:flex">
       <div>
-        <img class="border-b h-40 md:h-32 w-40 md:w-32 rounded-full mx-auto" src={src}>
+        <div class="flex-shrink-0 w-40 h-40 md:w-32 md:h-32 mx-auto">
+          <img class="h-full m-full rounded-full mx-auto" src={src}>
+        </div>
         <div class="flex justify-center">
           <Tooltip>
             <label slot="activator" class="w-8 flex flex-col items-center bg-white text-blue rounded-lg shadow-lg tracking-wide border border-blue cursor-pointer">
