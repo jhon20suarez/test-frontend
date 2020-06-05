@@ -11,10 +11,21 @@
   
   let showDialog = false;
   let showDialogQuestion = false;
+  let refreshParent = false;
+  
   let clients=[];
   let clientSelect=null;
   let searchFullName;
   let page=1;
+  
+  
+  $: {
+    if (refreshParent){
+      listClients();
+    }
+  }
+  
+  $: refreshParent;
   
   const handleClick = () => {
     token_api.update(n => '');
@@ -23,6 +34,7 @@
   onMount(() => listClients());
 	
 	async function listClients(){
+	  console.log("listClients()");
 	  const res = await fetch(API.concat('?page=').concat(page), {
 	                            method: 'GET',
                               headers:{
@@ -89,7 +101,7 @@
 	
 </script>
 <Dialog bind:value={showDialog} persistent>
-  <FormClients bind:show={showDialog} client_update={clientSelect} />
+  <FormClients bind:show={showDialog} client_update={clientSelect} bind:reloadedParent={refreshParent} />
 </Dialog>
 
 <Dialog bind:value={showDialogQuestion} persistent>
@@ -117,8 +129,8 @@
       </nav>
 
 
-    <section class="w-full h-full text-gray-900 bg-gray-200" >
-      <div class="container h-full px-1 w-full h-full mx-auto">
+    <div class="w-full h-full text-gray-900 bg-gray-200" >
+      <div class="container px-1 w-full h-full mx-auto">
           <div class="w-full px-2 pt-2 content-center h-full">
             <div class="mx-1 px-4 mx-auto md:flex items-center justify-between">
               <div class="md:w-1/2 text-center md:text-left">
@@ -176,7 +188,7 @@
                     </td>
                   </tr>
                 {:else}
-                  <p>loading...</p>
+                  <p>Cargando...</p>
                 {/each}
               </tbody>
               <tfoot>
@@ -206,4 +218,4 @@
             </div>
           </div>
       </div>
-    </section>
+    </div>

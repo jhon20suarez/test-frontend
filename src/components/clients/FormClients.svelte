@@ -5,6 +5,7 @@
   
   
   let show=false;
+  let reloadedParent=false;
   let client_update;
   
   let data_document_types=[];
@@ -12,6 +13,7 @@
   let data_countries=[];
   let data_departments=[];
   let data_cities=[];
+  
   
   let src="https://cdn2.iconfinder.com/data/icons/circle-icons-1/64/profle-512.png";
   let files;
@@ -29,7 +31,7 @@
     country_id:null,
   };
   
-  export {show,client_update};
+  export {show,client_update,reloadedParent};
   
   
   let select_document_type="";
@@ -204,7 +206,7 @@
 	    
 	  }
     let res;
-    if (client.id===""){
+    if (client.id==="" || client.id===null ){
       res = await fetch(API_CLIENTS, {
                               method: 'POST',
                               headers:{
@@ -226,6 +228,7 @@
     let data = await res.json();
     if(res.status===200){
       show=false;
+      reloadedParent=true;
     }else if(res.status===401){
       token_api.update(n => '');
       alert(data.errors);
@@ -235,7 +238,7 @@
     }
 	}
 </script>
-<div class="w-full bg-white shadow-lg rounded-lg my-4 ">
+<div class="w-full bg-white shadow-lg rounded-lg my-4">
   
     <div class="md:flex">
       <div>
@@ -319,7 +322,7 @@
     </div>
   
     <div class="py-3 px-3">
-      <Button color="secondary" on:click={sendClient}>{client.id === '' ? 'Crear' : 'Actualizar'}</Button>
+      <Button color="secondary" on:click={sendClient}>{client.id === '' || client.id ===null ? 'Crear' : 'Actualizar'}</Button>
       <Button color="error" on:click={() => {show = false}}>Cancelar</Button>
     </div>
 </div>
